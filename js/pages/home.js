@@ -1,6 +1,6 @@
 export const Home = {
     template:`
-        <button @click="exemplo">Clica aqui</button>
+        <h1>Placeholder</h1>
     `,
 
     methods:{

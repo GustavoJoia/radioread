@@ -11,9 +11,15 @@ export const Led = {
         </select>
     </div>
 
-    <canvas v-show="selected === 'a'" id="linha_mv"></canvas>
-    <canvas v-show="selected === 'b'" id="linha_ua"></canvas>
-    <canvas v-show="selected === 'c'" id="linha_total"></canvas>
+    <div v-show="selected === 'a'">
+        <canvas id="linha_mv"></canvas>
+    </div>
+    <div v-show="selected === 'b'">
+        <canvas id="linha_ua"></canvas>
+    </div>
+    <div v-show="selected === 'c'">
+        <canvas id="linha_total"></canvas>
+    </div>
 
     `,
     data(){
@@ -174,7 +180,6 @@ export const Led = {
                     }
                 }
             });
-
         },
 
         totalGraph(){
