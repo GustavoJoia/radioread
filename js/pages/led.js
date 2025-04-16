@@ -14,6 +14,11 @@ export const Led = {
     <div v-show="selected === 'a'">
         <canvas id="linha_mv"></canvas>
     </div>
+    <div v-show="selected === 'a'" class="mb-3">
+        <div id="range_mv"></div>
+        <p>De {{ range_mv[0] }} até {{ range_mv[1] }}</p>
+    </div>
+
     <div v-show="selected === 'b'">
         <canvas id="linha_ua"></canvas>
     </div>
@@ -26,6 +31,9 @@ export const Led = {
         return{
             selected:'',
             data: [],
+            range_mv: [],
+            range_ua: [],
+            range_total: [],
             timestamps: [],
             vm_mv: [],
             vm_ua: [],
@@ -40,7 +48,8 @@ export const Led = {
 
     methods:{
         async lerXlsx() {
-            const response = await fetch('https://gustavojoia.github.io/radioread/data/medicoes.xlsx');
+            // const response = await fetch('https://gustavojoia.github.io/radioread/data/medicoes.xlsx');
+            const response = await fetch('/data/medicoes.xlsx');
             const arrayBuffer = await response.arrayBuffer();
       
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -67,6 +76,8 @@ export const Led = {
                 this.am_ua.push(element['AM(uA)']);
             });
 
+            this.range_mv = [this.timestamps[0],this.timestamps[this.timestamps.length-1]];
+            this.tensionIntensity;
             this.tensionGraph();
             this.currentGraph();
         },
@@ -234,6 +245,24 @@ export const Led = {
                         }
                     }
                 }
+            });
+
+        },
+
+        tensionIntensity(){
+
+            const slider = document.querySelector('#range_mv');
+            noUiSlider.create(slider, {
+              start: this.range_mv,
+              connect: true,
+              range: {
+                min: 0,
+                max: 100
+              }
+            });
+          
+            slider.noUiSlider.on('update', (values) => {
+              this.range_mv = values.map(val => Math.round(val));
             });
 
         }
