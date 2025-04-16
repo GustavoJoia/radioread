@@ -40,7 +40,7 @@ export const Led = {
 
     methods:{
         async lerXlsx() {
-            const response = await fetch('../../data/medicoes.xlsx');
+            const response = await fetch('../data/medicoes.xlsx');
             const arrayBuffer = await response.arrayBuffer();
       
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
