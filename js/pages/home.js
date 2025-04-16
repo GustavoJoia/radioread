@@ -5,7 +5,11 @@ export const Home = {
 
     methods:{
         exemplo(){
-            console.log('Está funcionando!');
+            Swal.fire({
+                title: 'Perfeito!',
+                text: 'A configuração do ambiente Vue.js está funcionando!',
+                icon: 'success'
+            });
         }
     },
 }
