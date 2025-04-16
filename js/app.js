@@ -1,5 +1,6 @@
 // Importações, como telas, variaveis globais e componentes personalizados, aqui.
 import { Home } from "./pages/home.js";
+import { Sidebar } from "./components/sidebar.js";
 
 // Telas, de acordo com o padrão do gerenciador de rotas do Vue.js
 const routes = [
@@ -7,7 +8,6 @@ const routes = [
 ];
 
 //roteador
-
 const router = VueRouter.createRouter({
     history: VueRouter.createWebHashHistory(),
     routes
@@ -36,10 +36,17 @@ const App = {
         }
     },
 
+    components:{
+        Sidebar
+    },
+
     //componentes em si
     template: `
         <div class="d-flex justify-content-start flex-row h-100">
-            <router-view></router-view>
+            <Sidebar></Sidebar>
+            <div class="flex-grow-1 p-4">
+                <router-view class="flex-grow-1 p-4"></router-view>
+            </div>
         </div>
     `,
 }
