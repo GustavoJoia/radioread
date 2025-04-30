@@ -1,9 +1,8 @@
 export const Led = {
-    template:`
-
+    template: `
     <div class="mb-4">
         <label for="seletor" class="form-label">Escolha uma opção:</label>
-        <select id="seletor" class="form-select" v-model="selected" value="selected">
+        <select id="seletor" class="form-select" v-model="selected">
             <option value="">Selecione o gráfico...</option>
             <option value="a">Tensão (mV)</option>
             <option value="b">Corrente (uA)</option>
@@ -11,29 +10,34 @@ export const Led = {
         </select>
     </div>
 
+    <!-- Gráfico de Tensão -->
     <div v-show="selected === 'a'">
         <canvas id="linha_mv"></canvas>
-    </div>
-    <div v-show="selected === 'a'" class="mb-3">
-        <div id="range_mv"></div>
-        <p>De {{ range_mv[0] }} até {{ range_mv[1] }}</p>
+        <div id="range_mv" class="my-3"></div>
+        <p>De {{ timestamps[range_mv[0]] }} até {{ timestamps[range_mv[1]] }}</p>
     </div>
 
+    <!-- Gráfico de Corrente -->
     <div v-show="selected === 'b'">
         <canvas id="linha_ua"></canvas>
-    </div>
-    <div v-show="selected === 'c'">
-        <canvas id="linha_total"></canvas>
+        <div id="range_ua" class="my-3"></div>
+        <p>De {{ timestamps[range_ua[0]] }} até {{ timestamps[range_ua[1]] }}</p>
     </div>
 
+    <!-- Gráfico de Potência -->
+    <div v-show="selected === 'c'">
+        <canvas id="linha_total"></canvas>
+        <div id="range_total" class="my-3"></div>
+        <p>De {{ timestamps[range_total[0]] }} até {{ timestamps[range_total[1]] }}</p>
+    </div>
     `,
-    data(){
-        return{
-            selected:'',
+    data() {
+        return {
+            selected: '',
             data: [],
-            range_mv: [],
-            range_ua: [],
-            range_total: [],
+            range_mv: [0, 1],
+            range_ua: [0, 1],
+            range_total: [0, 1],
             timestamps: [],
             vm_mv: [],
             vm_ua: [],
@@ -42,28 +46,27 @@ export const Led = {
             az_mv: [],
             az_ua: [],
             am_mv: [],
-            am_ua: []
+            am_ua: [],
+            chart_mv: null,
+            chart_ua: null,
+            chart_total: null
         }
     },
 
-    methods:{
+    methods: {
         async lerXlsx() {
-            // const response = await fetch('https://gustavojoia.github.io/radioread/data/medicoes.xlsx');
             const response = await fetch('/data/medicoes.xlsx');
             const arrayBuffer = await response.arrayBuffer();
-      
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
             const primeiraPlanilha = workbook.SheetNames[0];
             const sheet = workbook.Sheets[primeiraPlanilha];
             const json = XLSX.utils.sheet_to_json(sheet);
-      
+
             this.data = json;
             this.handleData();
         },
 
-        handleData(){
-            // console.log(this.data);
-
+        handleData() {
             this.data.forEach(element => {
                 this.timestamps.push(`${element.Data} ${element.Hora}`);
                 this.vm_mv.push(element['VM (mV)']);
@@ -76,200 +79,115 @@ export const Led = {
                 this.am_ua.push(element['AM(uA)']);
             });
 
-            this.range_mv = [this.timestamps[0],this.timestamps[this.timestamps.length-1]];
-            this.tensionIntensity;
-            this.tensionGraph();
-            this.currentGraph();
+            const max = this.timestamps.length - 1;
+            this.range_mv = [0, max];
+            this.range_ua = [0, max];
+            this.range_total = [0, max];
+
+            this.initSliders();
+            this.updateTensionGraph();
+            this.updateCurrentGraph();
+            this.updatePowerGraph();
         },
 
-        tensionGraph(){
-
-            const graph_mv = document.querySelector('#linha_mv').getContext('2d');
-            
-            new Chart(graph_mv, {
-                type: 'line',
-                data:{
-                    labels: this.timestamps,
-                    datasets:[
-                    {
-                        label: 'Vermelho',
-                        data: this.vm_mv,
-                        fill: false,
-                        borderColor: 'red',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Verde',
-                        data: this.vd_mv,
-                        fill: false,
-                        borderColor: 'green',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Azul',
-                        data: this.az_mv,
-                        fill: false,
-                        borderColor: 'blue',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Amarelo',
-                        data: this.am_mv,
-                        fill: false,
-                        borderColor: 'yellow',
-                        tension: 0.1
-                    }
-                    ]
-                },
-                options:{
-                    responsive: true,
-                    plugins:{
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                        },
-                        title:{
-                            display: true,
-                            text: 'Gráfico de tensão gerada por faixa de cor de LED'
-                        }
-                    }
-                }
-            });
-
+        // Tensão
+        updateTensionGraph() {
+            const [start, end] = this.range_mv;
+            const ctx = document.getElementById('linha_mv').getContext('2d');
+            const labels = this.timestamps.slice(start, end + 1);
+            const datasets = [
+                { label: 'Vermelho', data: this.vm_mv.slice(start, end + 1), borderColor: 'red' },
+                { label: 'Verde', data: this.vd_mv.slice(start, end + 1), borderColor: 'green' },
+                { label: 'Azul', data: this.az_mv.slice(start, end + 1), borderColor: 'blue' },
+                { label: 'Amarelo', data: this.am_mv.slice(start, end + 1), borderColor: 'yellow' }
+            ];
+            if (this.chart_mv) this.chart_mv.destroy();
+            this.chart_mv = this.createLineChart(ctx, labels, datasets, 'Gráfico de Tensão (mV)');
         },
 
-        currentGraph(){
+        // Corrente
+        updateCurrentGraph() {
+            const [start, end] = this.range_ua;
+            const ctx = document.getElementById('linha_ua').getContext('2d');
+            const labels = this.timestamps.slice(start, end + 1);
+            const datasets = [
+                { label: 'Vermelho', data: this.vm_ua.slice(start, end + 1), borderColor: 'red' },
+                { label: 'Verde', data: this.vd_ua.slice(start, end + 1), borderColor: 'green' },
+                { label: 'Azul', data: this.az_ua.slice(start, end + 1), borderColor: 'blue' },
+                { label: 'Amarelo', data: this.am_ua.slice(start, end + 1), borderColor: 'yellow' }
+            ];
+            if (this.chart_ua) this.chart_ua.destroy();
+            this.chart_ua = this.createLineChart(ctx, labels, datasets, 'Gráfico de Corrente (uA)');
+        },
 
-            const graph_ua = document.querySelector('#linha_ua').getContext('2d');
-            
-            new Chart(graph_ua, {
+        // Potência
+        updatePowerGraph() {
+            const [start, end] = this.range_total;
+            const ctx = document.getElementById('linha_total').getContext('2d');
+            const labels = this.timestamps.slice(start, end + 1);
+
+            const calcPower = (v, i) => v.map((val, idx) => (val * i[idx]) / 1000);
+
+            const datasets = [
+                { label: 'Vermelho', data: calcPower(this.vm_mv, this.vm_ua).slice(start, end + 1), borderColor: 'red' },
+                { label: 'Verde', data: calcPower(this.vd_mv, this.vd_ua).slice(start, end + 1), borderColor: 'green' },
+                { label: 'Azul', data: calcPower(this.az_mv, this.az_ua).slice(start, end + 1), borderColor: 'blue' },
+                { label: 'Amarelo', data: calcPower(this.am_mv, this.am_ua).slice(start, end + 1), borderColor: 'yellow' }
+            ];
+            if (this.chart_total) this.chart_total.destroy();
+            this.chart_total = this.createLineChart(ctx, labels, datasets, 'Gráfico de Potência Total (uW)');
+        },
+
+        // Utilitário genérico de gráfico
+        createLineChart(ctx, labels, datasets, title) {
+            return new Chart(ctx, {
                 type: 'line',
-                data:{
-                    labels: this.timestamps,
-                    datasets:[
-                    {
-                        label: 'Vermelho',
-                        data: this.vm_ua,
+                data: {
+                    labels,
+                    datasets: datasets.map(ds => ({
+                        ...ds,
                         fill: false,
-                        borderColor: 'red',
                         tension: 0.1
-                    },
-                    {
-                        label: 'Verde',
-                        data: this.vd_ua,
-                        fill: false,
-                        borderColor: 'green',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Azul',
-                        data: this.az_ua,
-                        fill: false,
-                        borderColor: 'blue',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Amarelo',
-                        data: this.am_ua,
-                        fill: false,
-                        borderColor: 'yellow',
-                        tension: 0.1
-                    }
-                    ]
+                    }))
                 },
-                options:{
+                options: {
                     responsive: true,
-                    plugins:{
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                        },
-                        title:{
-                            display: true,
-                            text: 'Gráfico de corrente gerada por faixa de cor de LED'
-                        }
+                    plugins: {
+                        legend: { display: true, position: 'bottom' },
+                        title: { display: true, text: title }
                     }
                 }
             });
         },
 
-        totalGraph(){
-
-            const graph_total = document.querySelector('#linha_total').getContext('2d');
-            
-            new Chart(graph_total, {
-                type: 'line',
-                data:{
-                    labels: this.timestamps,
-                    datasets:[
-                    {
-                        label: 'Vermelho',
-                        data: this.vm_mv,
-                        fill: false,
-                        borderColor: 'red',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Verde',
-                        data: this.vd_mv,
-                        fill: false,
-                        borderColor: 'green',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Azul',
-                        data: this.az_mv,
-                        fill: false,
-                        borderColor: 'blue',
-                        tension: 0.1
-                    },
-                    {
-                        label: 'Amarelo',
-                        data: this.am_mv,
-                        fill: false,
-                        borderColor: 'yellow',
-                        tension: 0.1
+        // Sliders
+        initSliders() {
+            const createSlider = (id, rangeProp, updateFn) => {
+                const slider = document.getElementById(id);
+                noUiSlider.create(slider, {
+                    start: this[rangeProp],
+                    connect: true,
+                    range: { min: 0, max: this.timestamps.length - 1 },
+                    step: 1,
+                    tooltips: true,
+                    format: {
+                        to: val => Math.round(val),
+                        from: val => Number(val)
                     }
-                    ]
-                },
-                options:{
-                    responsive: true,
-                    plugins:{
-                        legend: {
-                            display: true,
-                            position: 'bottom',
-                        },
-                        title:{
-                            display: true,
-                            text: 'Gráfico de tensão gerada por faixa de cor de LED'
-                        }
-                    }
-                }
-            });
+                });
+                slider.noUiSlider.on('update', values => {
+                    this[rangeProp] = values.map(v => parseInt(v));
+                    updateFn();
+                });
+            };
 
-        },
-
-        tensionIntensity(){
-
-            const slider = document.querySelector('#range_mv');
-            noUiSlider.create(slider, {
-              start: this.range_mv,
-              connect: true,
-              range: {
-                min: 0,
-                max: 100
-              }
-            });
-          
-            slider.noUiSlider.on('update', (values) => {
-              this.range_mv = values.map(val => Math.round(val));
-            });
-
+            createSlider('range_mv', 'range_mv', this.updateTensionGraph);
+            createSlider('range_ua', 'range_ua', this.updateCurrentGraph);
+            createSlider('range_total', 'range_total', this.updatePowerGraph);
         }
-        
     },
 
     mounted() {
         this.lerXlsx();
-    },
-}
+    }
+};
