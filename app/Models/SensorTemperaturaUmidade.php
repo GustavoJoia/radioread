@@ -11,6 +11,7 @@ class SensorTemperaturaUmidade extends Model
     protected $fillable = [
         'data_hora',
         'temperatura_canal1',
-        'umidade_canal1'
+        'umidade_canal1',
+        'pressao_canal1'
     ];
 }
