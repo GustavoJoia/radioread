@@ -16,7 +16,7 @@ services:
       - key: APP_DEBUG
         value: false
       - key: APP_URL
-        value: https://radioread-laravel.onrender.com
+        value: https://radiometro-fatecitaquera.onrender.com
 
       # MongoDB
       - key: DB_CONNECTION
