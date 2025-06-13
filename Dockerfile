@@ -1,43 +1,39 @@
-# Instalar dependências via Composer
-FROM composer:2 AS build
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --prefer-dist --no-scripts
-
-# Imagem PHP com Apache
 FROM php:8.2-apache
 
 # Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
-    libzip-dev unzip git curl libssl-dev pkg-config libcurl4-openssl-dev \
+    unzip zip git curl libzip-dev libssl-dev pkg-config libcurl4-openssl-dev \
     && docker-php-ext-install zip
 
-# Instalar extensões PHP necessárias
-RUN pecl install mongodb \
-    && docker-php-ext-enable mongodb
+# Instalar a extensão MongoDB
+RUN pecl install mongodb && docker-php-ext-enable mongodb
 
-# Ativar mod_rewrite do Apache
+# Instalar Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Habilitar mod_rewrite do Apache
 RUN a2enmod rewrite
 
-# Copiar projeto Laravel
+# Definir diretório de trabalho
 WORKDIR /var/www/html
-COPY . ./
-COPY --from=build /app/vendor ./vendor
 
-# Permissões para o Laravel
+# Copiar todos os arquivos do projeto
+COPY . .
+
+# Instalar dependências PHP do Laravel
+RUN composer install --no-dev --prefer-dist --no-scripts
+
+# Permissões para Laravel
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
-# Definir diretório público como raiz
+# Definir o diretório público como raiz do Apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-# Ajustar configuração do Apache
+# Atualizar configs do Apache para servir o Laravel corretamente
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Expor porta
 EXPOSE 80
 
 CMD ["apache2-foreground"]
