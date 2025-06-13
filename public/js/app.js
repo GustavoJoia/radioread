@@ -2,6 +2,8 @@
 import { Home } from "./pages/home.js";
 import { Led } from "./pages/led.js";
 import { Temp } from "./pages/temp.js";
+import { Umi } from "./pages/umi.js";
+import { Press } from "./pages/press.js";
 
 import { Sidebar } from "./components/sidebar.js";
 
@@ -9,7 +11,9 @@ import { Sidebar } from "./components/sidebar.js";
 const routes = [
     { path:'/', component: Home, meta: {title: 'Início'} },
     { path: '/leds', component: Led, meta: {title: 'LEDs'} },
-    { path: '/temps', component: Temp, meta: {title: 'Temperatura'}}
+    { path: '/temps', component: Temp, meta: {title: 'Temperatura'}},
+    { path: '/umi', component: Umi, meta: {title: 'Umidade'}},
+    { path: '/press', component: Press, meta: {title: 'Pressão'}}
 ];
 
 //roteador

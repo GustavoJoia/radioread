@@ -6,8 +6,8 @@ export const Sidebar = {
                     <li><router-link to="/">Início</router-link></li>
                     <li><router-link to="/leds">Leitura de LED</router-link></li>
                     <li><router-link to="/temps">Leitura de Temperatura</router-link></li>
-                    <li><router-link to="/">Leitura de Umidade</router-link></li>
-                    <li><router-link to="/">Leitura de Pressão Barométrica</router-link></li>
+                    <li><router-link to="/umi">Leitura de Umidade</router-link></li>
+                    <li><router-link to="/press">Leitura de Pressão Barométrica</router-link></li>
                 </ul>
             </nav>
         </aside>

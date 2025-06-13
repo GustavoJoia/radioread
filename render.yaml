@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: radioread-laravel
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: APP_NAME
+        value: Laravel
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        value: base64:2DG7qZf4DqmWcOlmfBG6hnf2mNennRhHWO1qOcfrLWw=
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://radioread-laravel.onrender.com
+
+      # MongoDB
+      - key: DB_CONNECTION
+        value: mongodb
+      - key: DB_URI
+        value: mongodb+srv://gustavojoia:fatecitaquera@icfotovoltaico.m3dpzbc.mongodb.net/Leituras?retryWrites=true&w=majority&appName=ICfotovoltaico
+      - key: DB_DATABASE
+        value: Leituras
+
+      # Sessão, Cache, Queue
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: 120
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+
+      # Mail
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: hello@example.com
+      - key: MAIL_FROM_NAME
+        value: Laravel
+
+      # Vite
+      - key

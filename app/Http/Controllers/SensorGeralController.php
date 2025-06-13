@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SensorTemperaturaUmidade;
+use App\Models\SensorGeral;
 use Illuminate\Http\Request;
 use MongoDB\Client;
 use MongoDB\Laravel\Eloquent\Casts\ObjectId;
 
-class SensorTemperaturaUmidadeController extends Controller
+class SensorGeralController extends Controller
 {
     public function listar(){
         try {
@@ -35,7 +35,12 @@ class SensorTemperaturaUmidadeController extends Controller
             $dados = [
                 'data_hora'=> $request->input('data_hora'),
                 'temperatura_canal1'=>$request->input('temperatura_canal1'),
-                'umidade_canal1'=>$request->input('umidade_canal1')
+                'temperatura_canal2'=>$request->input('temperatura_canal2'),
+                'temperatura_canal3'=>$request->input('temperatura_canal3'),
+                'temperatura_canal4'=>$request->input('temperatura_canal4'),
+                'temperatura_canal5'=>$request->input('temperatura_canal5'),
+                'umidade_canal1'=>$request->input('umidade_canal1'),
+                'pressao_canal1'=>$request->input('pressao_canal1')
             ];
 
             $result = $collection->insertOne($dados);
@@ -52,40 +57,18 @@ class SensorTemperaturaUmidadeController extends Controller
         }
     }
 
-    public function atualizar(Request $request, String $id){
+    public function limpar(){
         try {
             
             $client = new Client(env('DB_URI'));
             $collection = $client->selectDatabase('Leituras')->selectCollection('Leituras_Sensor');
 
-            $objectId = new ObjectId($id);
-
-            $update = [];
-
-            if($request->has('temperatura_canal1')){
-                $update['temperatura_canal1'] = $request->input('temperatura_canal1');
-            }
-            if($request->has('umidade_canal1')){
-                $update['umidade_canal1'] = $request->input('umidade_canal1');
-            }
-            if($request->has('data_hora')){
-                $update['data_hora'] = $request->input('data_hora');
-            }
-
-            if (empty($update)) {
-                return response()->json([
-                    'mensagem' => 'Nenhum campo enviado para atualizar.'
-                ], 422);
-            }
-
-            $collection->updateOne(
-                ['_id' => $objectId],
-                ['$set' => $update]
-            );
+            $result = $collection->deleteMany([])->getDeletedCount();
 
             return response()->json([
-                'mensagem' => 'Leitura atualizada com sucesso.'
-            ]);
+                'message'=>"Limpeza concluida, dados excluídos:",
+                'dados'=>$result
+            ],200);
 
         } catch (\Exception $e) {
             return response()->json([
