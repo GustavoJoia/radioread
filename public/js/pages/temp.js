@@ -51,7 +51,7 @@ export const Temp = {
             if(this.chart){
                 this.chart.destroy()
             }
-            this.chart = this.createLineChart(ctx,labels,datasets,'Leituras de Temperatura')
+            this.chart = this.createLineChart(ctx,labels,datasets,'Leituras de Temperatura (°C)')
             Swal.close();
         },
         createLineChart(ctx, labels, datasets, title) {
@@ -70,6 +70,17 @@ export const Temp = {
                     plugins: {
                         legend: { display: true, position: 'bottom' },
                         title: { display: true, text: title }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    const rawLabel = this.getLabelForValue(value);
+                                    const date = new Date(rawLabel);
+                                    return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+                                }
+                            }
+                        }
                     }
                 }
             });

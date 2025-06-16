@@ -14,6 +14,5 @@ class Radiometro extends Model
         'tensaoAZ',
         'tensaoAM',
         'mediaMovelACD',
-        'data_hora'
     ];
 }

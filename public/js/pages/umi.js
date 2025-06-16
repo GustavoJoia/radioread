@@ -58,6 +58,17 @@ export const Umi = {
                     plugins: {
                         legend: { display: true, position: 'bottom' },
                         title: { display: true, text: title }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    const rawLabel = this.getLabelForValue(value);
+                                    const date = new Date(rawLabel);
+                                    return `${date.toLocaleDateString('pt-BR')} ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+                                }
+                            }
+                        }
                     }
                 }
             });

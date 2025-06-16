@@ -8,12 +8,21 @@ use MongoDB\Client;
 
 class SensorGeralController extends Controller
 {
+
+    public function teste(){
+        return response()->json([
+            'message'=>'Sucesso na requisição'
+        ],200);
+    }
+
     public function listar(){
         try {
             
             $client = new Client(env('DB_URI'));
             $collection = $client->selectDatabase('Leituras')->selectCollection('Leituras_Sensor');
-            $leituras = iterator_to_array($collection->find());
+            $leituras = iterator_to_array($collection->find([],[
+                'sort'=>['data_hora'=>1]
+            ]));
             
             return response()->json($leituras,200);
 
@@ -30,9 +39,10 @@ class SensorGeralController extends Controller
 
             $client = new Client(env('DB_URI'));
             $collection = $client->selectDatabase('Leituras')->selectCollection('Leituras_Sensor');
-
+            date_default_timezone_set('America/Sao_Paulo');
+            
             $dados = [
-                'data_hora'=> $request->input('data_hora'),
+                'data_hora'=> date('Y-m-d H:i:s'),
                 'temperatura_canal1'=>$request->input('temperatura_canal1'),
                 'temperatura_canal2'=>$request->input('temperatura_canal2'),
                 'temperatura_canal3'=>$request->input('temperatura_canal3'),
