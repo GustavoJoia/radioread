@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SensorGeral;
 use Illuminate\Http\Request;
 use MongoDB\Client;
-use MongoDB\Laravel\Eloquent\Casts\ObjectId;
 
 class SensorGeralController extends Controller
 {
