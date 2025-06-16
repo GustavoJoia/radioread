@@ -9,7 +9,6 @@ class SensorGeral extends Model
     protected $connection = 'mongodb';
     protected $collection = 'Leituras_Sensor';
     protected $fillable = [
-        'data_hora',
         'temperatura_canal1',
         'temperatura_canal2',
         'temperatura_canal3',
