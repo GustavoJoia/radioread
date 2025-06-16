@@ -19,3 +19,4 @@ Route::post("/sensor/gravar",[SensorGeralController::class,'gravar']);
 Route::post("/radiometro/gravar",[RadiometroController::class,'gravar']);
 
 Route::delete("/sensor/limpar",[SensorGeralController::class,'limpar']);
+Route::delete("/radiometro/limpar",[RadiometroController::class,'limpar']);
