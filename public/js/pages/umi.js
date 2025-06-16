@@ -1,5 +1,5 @@
 export const Umi = {
-    template: `<h1>Tela de umidade</h1>
+    template: `
         <canvas id="linha_umi"></canvas>
     `,
 

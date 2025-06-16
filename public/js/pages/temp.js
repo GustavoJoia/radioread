@@ -1,5 +1,5 @@
 export const Temp = {
-    template: `<h1>Tela de temperatura</h1>
+    template: `
         <canvas id="linha_temp"></canvas>
     `,
 

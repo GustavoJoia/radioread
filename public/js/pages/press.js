@@ -1,5 +1,5 @@
 export const Press = {
-    template: `<h1>Tela de pressão barométrica</h1>
+    template: `
         <canvas id="linha_press"></canvas>
     `,
 
