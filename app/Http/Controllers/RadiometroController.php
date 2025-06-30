@@ -45,7 +45,6 @@ class RadiometroController extends Controller
                 'tensaoVD'=>$request->input('tensaoVD'),
                 'tensaoAZ'=>$request->input('tensaoAZ'),
                 'tensaoAM'=>$request->input('tensaoAM'),
-                'mediaMovelACD'=>$request->input('mediaMovelACD'),
             ];
 
             $result = $collection->insertOne($dados);

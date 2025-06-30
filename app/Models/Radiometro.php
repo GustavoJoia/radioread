@@ -14,6 +14,5 @@ class Radiometro extends Model
         'tensaoVD',
         'tensaoAZ',
         'tensaoAM',
-        'mediaMovelACD',
     ];
 }

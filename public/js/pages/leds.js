@@ -5,13 +5,27 @@ export const Leds = {
 
     data(){
         return{
+
+            resistores:{
+                vm:3300,
+                vd:80000,
+                az:80000,
+                am:80000
+            },
+
             documents:[],
             datas:[],
-            temperaturas_1:[],
-            temperaturas_2:[],
-            temperaturas_3:[],
-            temperaturas_4:[],
-            temperaturas_5:[],
+            tensao_vm:[],
+            tensao_vd:[],
+            tensao_az:[],
+            tensao_am:[],
+            corrente_vm:[],
+            corrente_vd:[],
+            corrente_az:[],
+            corrente_am:[],
+            total_tensao:[],
+            total_corrente:[],
+            total_potencia:[],
             chart: null,
         }
     },
@@ -20,7 +34,7 @@ export const Leds = {
         requestTemp(){
             Swal.showLoading();
             let server = window.location.origin;
-            fetch(`${server}/api/sensor/listar`)
+            fetch(`${server}/api/radiometro/listar`)
             .then(response=>response.json())
             .then(response=>{
                 this.documents = response
@@ -30,28 +44,45 @@ export const Leds = {
         renderer(){
             console.log(this.documents)
             this.documents.forEach(leitura => {
-                this.temperaturas_1.push(leitura['temperatura_canal1'])
-                this.temperaturas_2.push(leitura['temperatura_canal2'])
-                this.temperaturas_3.push(leitura['temperatura_canal3'])
-                this.temperaturas_4.push(leitura['temperatura_canal4'])
-                this.temperaturas_5.push(leitura['temperatura_canal5'])
-                this.datas.push(leitura['data_hora'])
+
+                this.datas.push(leitura['data_hora']);
+
+                this.tensao_am.push(leitura['tensaoAM']);
+                this.tensao_az.push(leitura['tensaoAZ']);
+                this.tensao_vd.push(leitura['tensaoVD']);
+                this.tensao_vm.push(leitura['tensaoVM']);
+                this.total_tensao.push(leitura['tensaoAM']+leitura['tensaoAZ']+leitura['tensaoVD']+leitura['tensaoVM']);
+
+                this.corrente_am.push((leitura['tensaoAM']*this.resistores.am)/1000);
+                this.corrente_az.push((leitura['tensaoAZ']*this.resistores.az)/1000);
+                this.corrente_vd.push((leitura['tensaoVD']*this.resistores.vd)/1000);
+                this.corrente_vm.push((leitura['tensaoVM']*this.resistores.vm)/1000);
+                this.total_corrente.push((leitura['tensaoAM']/this.resistores.am)/1000+(leitura['tensaoAZ']/this.resistores.az)/1000+(leitura['tensaoVD']/this.resistores.vd)/1000+(leitura['tensaoVM']/this.resistores.vm)/1000);
+
+                this.total_potencia.push(this.total_corrente.at(-1)+this.total_tensao.at(-1));
+
             });
 
             const ctx = document.getElementById('linha_temp').getContext('2d')
             const labels = this.datas
             const datasets = [
-                {label:'Temperatura - Canal 1', data: this.temperaturas_1, borderColor:'red'},
-                {label:'Temperatura - Canal 2', data: this.temperaturas_2, borderColor:'green'},
-                {label:'Temperatura - Canal 3', data: this.temperaturas_3, borderColor:'blue'},
-                {label:'Temperatura - Canal 4', data: this.temperaturas_4, borderColor:'orange'},
-                {label:'Temperatura - Canal 5', data: this.temperaturas_5, borderColor:'purple'},
+                {label:'Tensão Vermelho', data: this.tensao_vm, borderColor:'red'},
+                {label:'Tensão Verde', data: this.tensao_vd, borderColor:'green'},
+                {label:'Tensão Azul', data: this.tensao_az, borderColor:'blue'},
+                {label:'Tensão Amarelo', data: this.tensao_am, borderColor:'yellow'},
+                {label:'Corrente Vermelho', data: this.corrente_vm, borderColor:'red'},
+                {label:'Corrente Verde', data: this.corrente_vd, borderColor:'green'},
+                {label:'Corrente Azul', data: this.corrente_az, borderColor:'blue'},
+                {label:'Corrente Amarelo', data: this.corrente_am, borderColor:'yellow'},
+                {label:'Tensão Total', data: this.total_tensao, borderColor:'purple'},
+                {label:'Corrente Total', data: this.total_corrente, borderColor:'purple'},
+                {label:'Potência Total', data: this.total_potencia, borderColor:'purple'},
             ]
 
             if(this.chart){
                 this.chart.destroy()
             }
-            this.chart = this.createLineChart(ctx,labels,datasets,'Leituras de Temperatura (°C)')
+            this.chart = this.createLineChart(ctx,labels,datasets,'Tensão registrada pelo Radiômetro')
             Swal.close();
         },
         createLineChart(ctx, labels, datasets, title) {
