@@ -1,4 +1,4 @@
-export const Led = {
+export const Plan = {
     template: `
     <h1>Resultados da coleta do radiômetro</h1>
     <div class="mb-4">

@@ -1,16 +1,18 @@
 // Importações, como telas, variaveis globais e componentes personalizados, aqui.
 import { Home } from "./pages/home.js";
-import { Led } from "./pages/led.js";
+import { Plan } from "./pages/plan.js";
 import { Temp } from "./pages/temp.js";
 import { Umi } from "./pages/umi.js";
 import { Press } from "./pages/press.js";
+import { Leds } from "./pages/leds.js";
 
 import { Sidebar } from "./components/sidebar.js";
 
 // Telas, de acordo com o padrão do gerenciador de rotas do Vue.js
 const routes = [
     { path:'/', component: Home, meta: {title: 'Início'} },
-    { path: '/leds', component: Led, meta: {title: 'LEDs'} },
+    { path: '/plan', component: Plan, meta: {title: 'LEDs - Planilha'} },
+    { path: '/leds', component: Leds, meta: {title:'LEDs - Radiômetro'}},
     { path: '/temps', component: Temp, meta: {title: 'Temperatura'}},
     { path: '/umi', component: Umi, meta: {title: 'Umidade'}},
     { path: '/press', component: Press, meta: {title: 'Pressão'}}
