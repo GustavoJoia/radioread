@@ -28,7 +28,6 @@ export const Temp = {
             })
         },
         renderer(){
-            console.log(this.documents)
             this.documents.forEach(leitura => {
                 this.temperaturas_1.push(leitura['temperatura_canal1'])
                 this.temperaturas_2.push(leitura['temperatura_canal2'])

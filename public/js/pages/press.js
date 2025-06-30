@@ -24,7 +24,6 @@ export const Press = {
             })
         },
         renderer(){
-            console.log(this.documents)
             this.documents.forEach(leitura => {
                 this.pressoes.push(leitura['pressao_canal1'])
                 this.datas.push(leitura['data_hora'])

@@ -24,7 +24,6 @@ export const Umi = {
             })
         },
         renderer(){
-            console.log(this.documents)
             this.documents.forEach(leitura => {
                 this.umidades.push(leitura['umidade_canal1'])
                 this.datas.push(leitura['data_hora'])

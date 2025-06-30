@@ -1,6 +1,6 @@
 export const Plan = {
     template: `
-    <h1>Resultados da coleta do radiômetro</h1>
+    <h1>Simulação de Exibição</h1>
     <div class="mb-4">
         <label for="seletor" class="form-label">Selecione o dado a ser apresentado:</label>
         <select id="seletor" class="form-select" v-model="selected">
@@ -55,6 +55,7 @@ export const Plan = {
 
     methods: {
         async lerXlsx() {
+            Swal.showLoading();
             const response = await fetch('/data/medicoes.xlsx');
             const arrayBuffer = await response.arrayBuffer();
             const workbook = XLSX.read(arrayBuffer, { type: 'array' });
@@ -83,7 +84,7 @@ export const Plan = {
             this.range_mv = [0, max];
             this.range_ua = [0, max];
             this.range_total = [0, max];
-
+            this.selected = 'a'
             this.initSliders();
             this.updateTensionGraph();
             this.updateCurrentGraph();
@@ -136,6 +137,7 @@ export const Plan = {
             ];
             if (this.chart_total) this.chart_total.destroy();
             this.chart_total = this.createLineChart(ctx, labels, datasets, 'Gráfico de Potência Total (uW)');
+            Swal.close();
         },
 
         // Utilitário genérico de gráfico
