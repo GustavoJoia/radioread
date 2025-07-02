@@ -16,6 +16,7 @@ Route::get("/sensor/listar",[SensorGeralController::class,'listar']);
 Route::get("/radiometro/listar",[RadiometroController::class,'listar']);
 
 Route::post("/sensor/gravar",[SensorGeralController::class,'gravar']);
+Route::post("/sensor/gravar/arquivo",[SensorGeralController::class,'gravarArquivo']);
 Route::post("/radiometro/gravar",[RadiometroController::class,'gravar']);
 
 Route::delete("/sensor/limpar",[SensorGeralController::class,'limpar']);

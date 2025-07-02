@@ -14,8 +14,8 @@ class SensorGeral extends Model
         'temperatura_canal2',
         'temperatura_canal3',
         'temperatura_canal4',
-        'temperatura_canal5',
         'umidade_canal1',
-        'pressao_canal1'
+        'pressao_canal1',
+        'altitude_canal1'
     ];
 }

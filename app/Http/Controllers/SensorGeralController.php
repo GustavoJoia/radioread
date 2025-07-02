@@ -47,7 +47,7 @@ class SensorGeralController extends Controller
                 'temperatura_canal2'=>$request->input('temperatura_canal2'),
                 'temperatura_canal3'=>$request->input('temperatura_canal3'),
                 'temperatura_canal4'=>$request->input('temperatura_canal4'),
-                'temperatura_canal5'=>$request->input('temperatura_canal5'),
+                'altitude_canal1'=>$request->input('altitude_canal1'),
                 'umidade_canal1'=>$request->input('umidade_canal1'),
                 'pressao_canal1'=>$request->input('pressao_canal1')
             ];
@@ -56,6 +56,42 @@ class SensorGeralController extends Controller
 
             return response()->json([
                 'message'=>'Gravação de leitura bem sucedida!',
+            ],200);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message'=>'Houve um erro no acesso ao banco de dados!',
+                'error'=>$e->getMessage()
+            ],500);
+        }
+    }
+
+    public function gravarArquivo(Request $request){
+        try {
+
+            $client = new Client(env('DB_URI'));
+            $collection = $client->selectDatabase('Leituras')->selectCollection('Leituras_Sensor');
+            date_default_timezone_set('America/Sao_Paulo');
+
+            $linhas = $request->all();
+
+            foreach ($linhas as $indice => $linha) {
+                $leitura = explode(',',$linha);
+                $dados = [
+                    'data_hora'=> date('Y-m-d H:i:s'),
+                    'temperatura_canal1'=>floatval($leitura[0]),
+                    'temperatura_canal2'=>floatval($leitura[1]),
+                    'temperatura_canal3'=>floatval($leitura[2]),
+                    'temperatura_canal4'=>floatval($leitura[3]),
+                    'altitude_canal1'=>floatval($leitura[4]),
+                    'umidade_canal1'=>floatval($leitura[5]),
+                    'pressao_canal1'=>floatval($leitura[6])
+                ];
+                $result = $collection->insertOne($dados);
+            }
+
+            return response()->json([
+                'message'=>'Dados inseridos!'
             ],200);
             
         } catch (\Exception $e) {

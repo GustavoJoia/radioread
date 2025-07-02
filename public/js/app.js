@@ -1,10 +1,9 @@
 // Importações, como telas, variaveis globais e componentes personalizados, aqui.
 import { Home } from "./pages/home.js";
 import { Plan } from "./pages/plan.js";
-import { Temp } from "./pages/temp.js";
-import { Umi } from "./pages/umi.js";
-import { Press } from "./pages/press.js";
+import { Sensor } from "./pages/sensor.js";
 import { Leds } from "./pages/leds.js";
+import { Upload } from "./pages/upload.js";
 
 import { Sidebar } from "./components/sidebar.js";
 
@@ -13,9 +12,8 @@ const routes = [
     { path:'/', component: Home, meta: {title: 'Início'} },
     { path: '/plan', component: Plan, meta: {title: 'LEDs - Planilha'} },
     { path: '/leds', component: Leds, meta: {title:'LEDs - Radiômetro'}},
-    { path: '/temps', component: Temp, meta: {title: 'Temperatura'}},
-    { path: '/umi', component: Umi, meta: {title: 'Umidade'}},
-    { path: '/press', component: Press, meta: {title: 'Pressão'}}
+    { path: '/sensor', component: Sensor, meta: {title: 'Sensor - Temperatura, Pressão, Umidade'}},
+    { path: '/upload', component: Upload, meta: {title: 'Sensor - Upload de dados via .txt'}}
 ];
 
 //roteador

@@ -6,7 +6,7 @@ export const Leds = {
             <select id="seletor" class="form-select" v-model="chart">
                 <option value="a">Tensão (mV)</option>
                 <option value="b">Corrente (uA)</option>
-                <option value="c">Valores Totais (uW)</option>
+                <option value="c">Potência total (uW)</option>
             </select>
         </div>
         <canvas v-show="chart=='a'" id="tensao"></canvas>
@@ -16,7 +16,12 @@ export const Leds = {
 
     data(){
         return{
-            chart: '',
+            chart: null,
+            charts:{
+                tensao:null,
+                corrente:null,
+                totais:null
+            },
             resistores:{
                 vm:3300,
                 vd:80000,
@@ -78,34 +83,39 @@ export const Leds = {
             const ctx_totais = document.getElementById('totais').getContext('2d')
             const labels = this.datas
             const datasets_tensao = [
-                {label:'Tensão Vermelho', data: this.tensao_vm, borderColor:'red'},
-                {label:'Tensão Verde', data: this.tensao_vd, borderColor:'green'},
-                {label:'Tensão Azul', data: this.tensao_az, borderColor:'blue'},
-                {label:'Tensão Amarelo', data: this.tensao_am, borderColor:'yellow'}
-
-                // {label:'Tensão Total', data: this.total_tensao, borderColor:'purple'},
-                // {label:'Corrente Total', data: this.total_corrente, borderColor:'pink'},
-                // {label:'Potência Total', data: this.total_potencia, borderColor:'magenta'},
+                {label:'LED Vermelho', data: this.tensao_vm, borderColor:'red'},
+                {label:'LED Verde', data: this.tensao_vd, borderColor:'green'},
+                {label:'LED Azul', data: this.tensao_az, borderColor:'blue'},
+                {label:'LED Amarelo', data: this.tensao_am, borderColor:'yellow'},
+                {label:'Tensão Total', data: this.total_tensao, borderColor:'purple'},
             ]
             const datasets_corrente = [
-                {label:'Corrente Vermelho', data: this.corrente_vm, borderColor:'red'},
-                {label:'Corrente Verde', data: this.corrente_vd, borderColor:'green'},
-                {label:'Corrente Azul', data: this.corrente_az, borderColor:'blue'},
-                {label:'Corrente Amarelo', data: this.corrente_am, borderColor:'yellow'},
+                {label:'LED Vermelho', data: this.corrente_vm, borderColor:'red'},
+                {label:'LED Verde', data: this.corrente_vd, borderColor:'green'},
+                {label:'LED Azul', data: this.corrente_az, borderColor:'blue'},
+                {label:'LED Amarelo', data: this.corrente_am, borderColor:'yellow'},
+                {label:'Corrente Total', data: this.total_corrente, borderColor:'pink'},
             ]
             const datasets_totais = [
-                {label:'Tensão Total', data: this.total_tensao, borderColor:'purple'},
-                {label:'Corrente Total', data: this.total_corrente, borderColor:'pink'},
                 {label:'Potência Total', data: this.total_potencia, borderColor:'magenta'}
             ]
 
-            if(this.chart){
-                this.chart.destroy()
+            if(this.charts.tensao){
+                this.charts.tensao.destroy()
             }
-            this.chart_tensao = this.createLineChart(ctx_tensao,labels,datasets_tensao,'Tensão registrada pelo Radiômetro')
-            this.chart_corrente = this.createLineChart(ctx_corrente,labels,datasets_corrente,'Corrente registrada pelo Radiômetro')
-            this.chart_totais = this.createLineChart(ctx_totais,labels,datasets_totais,'Valores totais registrados pelo Radiômetro')
-            this.chart = 'a';
+            this.charts.tensao = this.createLineChart(ctx_tensao,labels,datasets_tensao,'Tensão registrada (mV)')
+            
+            if(this.charts.corrente){
+                this.charts.corrente.destroy()
+            }
+            this.charts.corrente = this.createLineChart(ctx_corrente,labels,datasets_corrente,'Corrente registrada (uA)')
+            
+            if(this.charts.totais){
+                this.charts.totais.destroy()
+            }
+            this.charts.totais = this.createLineChart(ctx_totais,labels,datasets_totais,'Potência total registrada (uW)')
+            
+            this.chart = 'a'
             Swal.close();
         },
         createLineChart(ctx, labels, datasets, title) {
