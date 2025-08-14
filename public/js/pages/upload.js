@@ -69,7 +69,7 @@ export const Upload = {
             this.leitor.readAsText(arquivo);
         },
         quebrarLinhas(){
-            let linhas = this.arquivo.split(';');
+            let linhas = this.arquivo.split(';\n');
             console.log(linhas);
             this.linhas_dados = JSON.stringify(linhas);
         },
