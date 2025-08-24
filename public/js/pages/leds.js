@@ -109,44 +109,44 @@ export const Leds = {
             this.selectedHoraFim = horas[horas.length-1];
         },
         gerarDatasDisponiveis() {
-            const anos = new Set();
-            const meses = new Set();
-            const dias = new Set();
-
+            const anos = [];
             this.documents.forEach(d => {
                 const date = new Date(d.data_hora);
-                anos.add(date.getFullYear());
+
+                if(anos[anos.length-1]!=date.getFullYear()){
+                    anos.push(date.getFullYear());
+                }
             });
 
-            this.anosDisponiveis = Array.from(anos).sort((a,b)=>a-b);
+            this.anosDisponiveis = anos.sort((a,b)=>a-b);
             this.selectedAno = this.anosDisponiveis[0];
 
             this.atualizarMesesDias();
         },
         atualizarMesesDias() {
-            console.log(this.anosDisponiveis)
-            const meses = new Set();
-            const dias = new Set();
+
+            const meses = [];
+            const dias = [];
 
             this.documents.forEach(d => {
                 const date = new Date(d.data_hora);
-                if (date.getFullYear() === this.selectedAno) {
-                    meses.add(date.getMonth() + 1); // mês de 1 a 12
+                if (date.getFullYear() === this.selectedAno && meses[meses.length-1]!=date.getMonth()+1) {
+                    meses.push(date.getMonth() + 1); // mês de 1 a 12
                 }
             });
 
-            this.mesesDisponiveis = Array.from(meses).sort((a,b)=>a-b);
-            this.selectedMes = this.mesesDisponiveis[0];
+            this.mesesDisponiveis = meses.sort((a,b)=>a-b);
+            this.selectedMes = this.mesesDisponiveis[this.mesesDisponiveis.length-1];
 
             this.documents.forEach(d => {
                 const date = new Date(d.data_hora);
-                if (date.getFullYear() === this.selectedAno && (date.getMonth()+1) === this.selectedMes) {
-                    dias.add(date.getDate());
+                if (date.getFullYear() === this.selectedAno && (date.getMonth()+1) === this.selectedMes && dias[dias.length-1]!=date.getDate()) {
+                    dias.push(date.getDate());
                 }
             });
 
-            this.diasDisponiveis = Array.from(dias).sort((a,b)=>a-b);
-            this.selectedDia = this.diasDisponiveis[0];
+            this.diasDisponiveis = dias.sort((a,b)=>a-b);
+            this.selectedDia = this.diasDisponiveis[this.diasDisponiveis.length-1];
         },
         filtrarPorDataEHora() {
             const dataInicio = new Date(`${this.selectedAno}-${this.selectedMes.toString().padStart(2,'0')}-${this.selectedDia.toString().padStart(2,'0')}T${this.selectedHoraInicio}:00`);
@@ -203,6 +203,9 @@ export const Leds = {
             .then(response=>response.json())
             .then(response=>{
                 this.documents = response
+                this.gerarHoras();
+                this.gerarDatasDisponiveis();
+                this.atualizarMesesDias();
                 this.rendererFiltrado()
             })
         },
@@ -223,7 +226,7 @@ export const Leds = {
                 this.corrente_vm.push((leitura['tensaoVM']*this.resistores.vm)/1000);
                 this.total_corrente.push((this.corrente_am.at(-1))+(this.corrente_az.at(-1))+(this.corrente_vd.at(-1))+(this.corrente_vm.at(-1)));
 
-                this.total_potencia.push((this.total_corrente.at(-1))+(this.total_tensao.at(-1)));
+                this.total_potencia.push((this.total_corrente.at(-1))*(this.total_tensao.at(-1)));
 
             });
 
@@ -301,6 +304,5 @@ export const Leds = {
     },
     mounted(){
         this.requestTemp();
-        this.gerarHoras();
     }
 }
