@@ -12,19 +12,19 @@ export const Leds = {
         <div class="row mb-3">
             <div class="col">
                 <label>Ano:</label>
-                <select v-model="selectedAno" @change="atualizarMesesDias; rendererFiltrado()" class="form-select">
+                <select v-model="selectedAno" @change="atualizarMesesDias; filtrarPorDataEHora()" class="form-select">
                     <option v-for="ano in anosDisponiveis" :key="ano">{{ano}}</option>
                 </select>
             </div>
             <div class="col">
                 <label>Mês:</label>
-                <select v-model="selectedMes" @change="atualizarMesesDias; rendererFiltrado()" class="form-select">
+                <select v-model="selectedMes" @change="atualizarMesesDias; filtrarPorDataEHora()" class="form-select">
                     <option v-for="mes in mesesDisponiveis" :key="mes">{{mes}}</option>
                 </select>
             </div>
             <div class="col">
                 <label>Dia:</label>
-                <select v-model="selectedDia" @change="rendererFiltrado()" class="form-select">
+                <select v-model="selectedDia" @change="atualizarMesesDias; filtrarPorDataEHora()" class="form-select">
                     <option v-for="dia in diasDisponiveis" :key="dia">{{dia}}</option>
                 </select>
             </div>
@@ -33,21 +33,24 @@ export const Leds = {
         <div class="row mb-3">
             <div class="col">
                 <label>Hora Início:</label>
-                <select v-model="selectedHoraInicio" @change="rendererFiltrado()" class="form-select">
+                <select v-model="selectedHoraInicio" @change="filtrarPorDataEHora()" class="form-select">
                     <option v-for="h in horasDisponiveis" :key="h">{{h}}</option>
                 </select>
             </div>
             <div class="col">
                 <label>Hora Fim:</label>
-                <select v-model="selectedHoraFim" @change="rendererFiltrado()" class="form-select">
+                <select v-model="selectedHoraFim" @change="filtrarPorDataEHora()" class="form-select">
                     <option v-for="h in horasDisponiveis" :key="h">{{h}}</option>
                 </select>
             </div>
         </div>
 
-        <canvas v-show="chart=='a'" id="tensao"></canvas>
-        <canvas v-show="chart=='b'" id="corrente"></canvas>
-        <canvas v-show="chart=='c'" id="totais"></canvas>
+        <div class="row mb-3 overflow-hidden">
+            <canvas :class="{ active: chart==='a' }" id="tensao"></canvas>
+            <canvas :class="{ active: chart==='b' }" id="corrente"></canvas>
+            <canvas :class="{ active: chart==='c' }" id="totais"></canvas>
+        </div>
+
     `,
 
     data(){
@@ -77,6 +80,7 @@ export const Leds = {
             horasDisponiveis: [],
 
             documents:[],
+            filtrados:[],
             datas:[],
             tensao_vm:[],
             tensao_vd:[],
@@ -93,8 +97,21 @@ export const Leds = {
         }
     },
 
+    watch:{
+        filtrados(novo,velho){
+            console.log(this.chart)
+            this.renderer()
+            console.log(this.chart)
+        }
+    },
+
     methods:{
 
+        formatarData(data){
+            let dia_hora = data.split(" ")
+            let ddmmaa = `${dia_hora[0].split("-")[2]}/${dia_hora[0].split("-")[1]}/${dia_hora[0].split("-")[0]}`
+            return `${ddmmaa} ${dia_hora[1]}`
+        },
         gerarHoras() {
             const horas = [];
             for (let h = 0; h < 24; h++) {
@@ -157,12 +174,22 @@ export const Leds = {
                 return dt >= dataInicio && dt <= dataFim;
             });
 
-            return filtrados;
+            this.filtrados = filtrados;
         },
-        rendererFiltrado() {
-            const filtrados = this.filtrarPorDataEHora();
-
-            // Limpa arrays
+        requestTemp(){
+            Swal.showLoading();
+            let server = window.location.origin;
+            fetch(`${server}/api/radiometro/listar`)
+            .then(response=>response.json())
+            .then(response=>{
+                this.documents = response
+                this.gerarHoras();
+                this.gerarDatasDisponiveis();
+                this.atualizarMesesDias();
+                this.filtrarPorDataEHora();
+            })
+        },
+        renderer(){
             this.datas = [];
             this.tensao_am = [];
             this.tensao_az = [];
@@ -175,42 +202,8 @@ export const Leds = {
             this.corrente_vm = [];
             this.total_corrente = [];
             this.total_potencia = [];
-
-            filtrados.forEach(leitura => {
-                this.datas.push(leitura['data_hora']);
-                this.tensao_am.push(leitura['tensaoAM']);
-                this.tensao_az.push(leitura['tensaoAZ']);
-                this.tensao_vd.push(leitura['tensaoVD']);
-                this.tensao_vm.push(leitura['tensaoVM']);
-                this.total_tensao.push((this.tensao_am.at(-1))+(this.tensao_az.at(-1))+(this.tensao_vd.at(-1))+(this.tensao_vm.at(-1)));
-                
-                this.corrente_am.push((leitura['tensaoAM']*this.resistores.am)/1000);
-                this.corrente_az.push((leitura['tensaoAZ']*this.resistores.az)/1000);
-                this.corrente_vd.push((leitura['tensaoVD']*this.resistores.vd)/1000);
-                this.corrente_vm.push((leitura['tensaoVM']*this.resistores.vm)/1000);
-                this.total_corrente.push((this.corrente_am.at(-1))+(this.corrente_az.at(-1))+(this.corrente_vd.at(-1))+(this.corrente_vm.at(-1)));
-
-                this.total_potencia.push((this.total_corrente.at(-1))+(this.total_tensao.at(-1)));
-            });
-
-            // Atualiza o gráfico
-            this.renderer();
-        },
-        requestTemp(){
-            Swal.showLoading();
-            let server = window.location.origin;
-            fetch(`${server}/api/radiometro/listar`)
-            .then(response=>response.json())
-            .then(response=>{
-                this.documents = response
-                this.gerarHoras();
-                this.gerarDatasDisponiveis();
-                this.atualizarMesesDias();
-                this.rendererFiltrado()
-            })
-        },
-        renderer(){
-            this.documents.forEach(leitura => {
+            
+            this.filtrados.forEach(leitura => {
 
                 this.datas.push(leitura['data_hora']);
 
@@ -267,10 +260,11 @@ export const Leds = {
             }
             this.charts.totais = this.createLineChart(ctx_totais,labels,datasets_totais,'Potência total registrada (uW)')
             
-            this.chart = 'a'
             Swal.close();
+            this.chart = this.chart
         },
         createLineChart(ctx, labels, datasets, title) {
+            
             return new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -298,11 +292,13 @@ export const Leds = {
                             }
                         }
                     }
+
                 }
             });
         },
     },
     mounted(){
         this.requestTemp();
+        this.chart = 'a'
     }
 }
